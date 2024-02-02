@@ -24,15 +24,15 @@ function updateSelectedLayers() {
     const css = getTextNodeCSS(node);
 
     Object.entries(css).forEach(([property, value]) => {
-      cssInfoHTML += `<p><strong>${property}:</strong> ${value};</p>`;
+      cssInfoHTML += `<p><strong class="dark">${property}:</strong> ${value};</p>`;
     });
 
     cssInfoHTML += '</div>';
     totalHeight = 350; // Adjust this value based on your content's height
   } else if (selectedNodes.length > 1) {
-    cssInfoHTML = '😩 One layer at a time please!';
+    cssInfoHTML = `<p class="inter"><strong>⚠️ Error:</strong> Cannot select multiple layers</p>`;
   } else {
-    cssInfoHTML = 'No text layers selected';
+    cssInfoHTML = `<p class="inter dark">No text layers selected</p>`;
   }
 
   figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML, totalHeight });
