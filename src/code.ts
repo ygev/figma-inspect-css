@@ -1,21 +1,21 @@
 // code.ts
 import { isTextNode } from "@figma-plugin/helpers";
 import { getTextNodeCSS } from "@figma-plugin/helpers";
-const firstTextNode = figma.currentPage.findOne(node => isTextNode(node));
-console.log("First Text Node is " + firstTextNode);
+// const firstTextNode = figma.currentPage.findOne(node => isTextNode(node));
+// console.log("First Text Node is " + firstTextNode);
 
-const selectedNodes = figma.currentPage.selection;
+// const selectedNodes = figma.currentPage.selection;
 
-selectedNodes.forEach(node => {
-  if (isTextNode(node)) {
-    const css = getTextNodeCSS(node);
-    Object.entries(css).forEach(([property, value]) => {
-      console.log(`CSS Property: ${property}, Value: ${value}`);
-    });
-  }
-});
+// selectedNodes.forEach(node => {
+//   if (isTextNode(node)) {
+//     const css = getTextNodeCSS(node);
+//     Object.entries(css).forEach(([property, value]) => {
+//       console.log(`CSS Property: ${property}, Value: ${value}`);
+//     });
+//   }
+// });
 
-figma.showUI(__html__, { width: 300, height: 200 });
+figma.showUI(__html__, { width: 240, height: 1 });
 
 // Initial update on plugin load
 updateSelectedLayers();
@@ -27,29 +27,35 @@ figma.on('selectionchange', () => {
 
 function updateSelectedLayers() {
   const selectedNodes = figma.currentPage.selection;
+
   let cssInfoHTML = '';
+  let totalHeight = 50; // Default height for no selection or error
 
-  selectedNodes.forEach(node => {
-    if (isTextNode(node)) {
-      const css = getTextNodeCSS(node);
-      cssInfoHTML += `<div><p><strong>Layer Name:</strong> ${node.name}</p>`;
-      Object.entries(css).forEach(([property, value]) => {
-        cssInfoHTML += `<p><strong>${property}:</strong> ${value}</p>`;
-      });
-      cssInfoHTML += '</div>';
-    }
-  });
+  if (selectedNodes.length === 1 && isTextNode(selectedNodes[0])) {
+    const node = selectedNodes[0];
+    cssInfoHTML = '<div>';
+    const css = getTextNodeCSS(node);
 
-  if (cssInfoHTML !== '') {
-    figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML });
+    Object.entries(css).forEach(([property, value]) => {
+      cssInfoHTML += `<p><strong>${property}:</strong> ${value};</p>`;
+    });
+
+    cssInfoHTML += '</div>';
+    totalHeight = 350; // Adjust this value based on your content's height
+  } else if (selectedNodes.length > 1) {
+    cssInfoHTML = '😩 One layer at a time please!';
   } else {
-    figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML: 'No text layers selected.' });
+    cssInfoHTML = 'No text layers selected';
   }
+
+  figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML, totalHeight });
 }
+
+
 
 // Listen for messages from the plugin UI
 figma.ui.onmessage = (msg) => {
-  if (msg.type === 'applyChanges') {
-    // Handle any UI interactions if needed
+  if (msg.type === 'resize') {
+    figma.ui.resize(240, msg.totalHeight);
   }
 };

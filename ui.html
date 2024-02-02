@@ -1,28 +1,54 @@
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Figma Plugin UI</title>
-  <style>
-    body {
-      padding: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div id="cssInfo"></div>
-  <script>
-    function updateCSSInfo(cssInfoHTML) {
-      document.getElementById('cssInfo').innerHTML = cssInfoHTML;
-    }
-
-    // Listen for messages from the plugin
-    window.onmessage = (event) => {
-      const msg = event.data.pluginMessage;
-      if (msg.type === 'updateCSSInfo') {
-        updateCSSInfo(msg.cssInfoHTML);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css"
+      rel="stylesheet"
+    />
+    <title>Inspect CSS</title>
+    <style>
+      body {
+        font-family: "Inter", Arial, Helvetica, sans-serif;
+        padding: 8px;
+        font-size: 11px;
+        line-height: 16px;
+        font-weight: 400;
       }
-    };
-  </script>
-</body>
+      p {
+        padding: 0;
+        margin: 0;
+        font-family: "Roboto Mono", monospace;
+        color: #f24822;
+      }
+      strong {
+        color: #333333;
+        font-weight: 400;
+      }
+    </style>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="cssInfo"></div>
+    <script>
+ function updateCSSInfo(cssInfoHTML, totalHeight) {
+    document.getElementById("cssInfo").innerHTML = cssInfoHTML;
+    parent.postMessage({ pluginMessage: { type: "resize", totalHeight } }, "*");
+  }
+
+  // Listen for messages from the plugin
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (msg.type === "updateCSSInfo") {
+      updateCSSInfo(msg.cssInfoHTML, msg.totalHeight);
+    }
+  };
+    </script>
+  </body>
 </html>
