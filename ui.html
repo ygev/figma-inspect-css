@@ -1,0 +1,28 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma Plugin UI</title>
+  <style>
+    body {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="layerInfo"></div>
+  <script>
+    function updateLayerInfo(layerInfoHTML) {
+      document.getElementById('layerInfo').innerHTML = layerInfoHTML;
+    }
+
+    // Listen for messages from the plugin
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === 'updateLayerInfo') {
+        updateLayerInfo(msg.layerInfoHTML);
+      }
+    };
+  </script>
+</body>
+</html>
