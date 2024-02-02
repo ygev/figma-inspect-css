@@ -1,19 +1,6 @@
 // code.ts
 import { isTextNode } from "@figma-plugin/helpers";
 import { getTextNodeCSS } from "@figma-plugin/helpers";
-// const firstTextNode = figma.currentPage.findOne(node => isTextNode(node));
-// console.log("First Text Node is " + firstTextNode);
-
-// const selectedNodes = figma.currentPage.selection;
-
-// selectedNodes.forEach(node => {
-//   if (isTextNode(node)) {
-//     const css = getTextNodeCSS(node);
-//     Object.entries(css).forEach(([property, value]) => {
-//       console.log(`CSS Property: ${property}, Value: ${value}`);
-//     });
-//   }
-// });
 
 figma.showUI(__html__, { width: 240, height: 1 });
 
@@ -50,8 +37,6 @@ function updateSelectedLayers() {
 
   figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML, totalHeight });
 }
-
-
 
 // Listen for messages from the plugin UI
 figma.ui.onmessage = (msg) => {
