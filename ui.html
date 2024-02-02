@@ -10,17 +10,17 @@
   </style>
 </head>
 <body>
-  <div id="layerInfo"></div>
+  <div id="cssInfo"></div>
   <script>
-    function updateLayerInfo(layerInfoHTML) {
-      document.getElementById('layerInfo').innerHTML = layerInfoHTML;
+    function updateCSSInfo(cssInfoHTML) {
+      document.getElementById('cssInfo').innerHTML = cssInfoHTML;
     }
 
     // Listen for messages from the plugin
     window.onmessage = (event) => {
       const msg = event.data.pluginMessage;
-      if (msg.type === 'updateLayerInfo') {
-        updateLayerInfo(msg.layerInfoHTML);
+      if (msg.type === 'updateCSSInfo') {
+        updateCSSInfo(msg.cssInfoHTML);
       }
     };
   </script>

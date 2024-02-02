@@ -5,10 +5,13 @@ const firstTextNode = figma.currentPage.findOne(node => isTextNode(node));
 console.log("First Text Node is " + firstTextNode);
 
 const selectedNodes = figma.currentPage.selection;
+
 selectedNodes.forEach(node => {
   if (isTextNode(node)) {
     const css = getTextNodeCSS(node);
-    console.log("Testicle CSS is " + css["font-family"]);
+    Object.entries(css).forEach(([property, value]) => {
+      console.log(`CSS Property: ${property}, Value: ${value}`);
+    });
   }
 });
 
@@ -23,51 +26,30 @@ figma.on('selectionchange', () => {
 });
 
 function updateSelectedLayers() {
-  const selectedLayers = figma.currentPage.selection;
+  const selectedNodes = figma.currentPage.selection;
+  let cssInfoHTML = '';
 
-  if (selectedLayers.length > 0) {
-    const layerInfoHTML = selectedLayers
-      .map((layer) => {
-        let typeInfo;
-        let additionalInfo = '';
+  selectedNodes.forEach(node => {
+    if (isTextNode(node)) {
+      const css = getTextNodeCSS(node);
+      cssInfoHTML += `<div><p><strong>Layer Name:</strong> ${node.name}</p>`;
+      Object.entries(css).forEach(([property, value]) => {
+        cssInfoHTML += `<p><strong>${property}:</strong> ${value}</p>`;
+      });
+      cssInfoHTML += '</div>';
+    }
+  });
 
-        if (layer.type === 'TEXT') {
-          typeInfo = `<p><strong>Text Layer</strong></p>`;
-          additionalInfo = getTextLayerInfo(layer as TextNode);
-        } else if (layer.type === 'RECTANGLE' || layer.type === 'ELLIPSE') {
-          typeInfo = `<p><strong>Shape Layer</strong></p>`;
-          additionalInfo = getShapeLayerInfo(layer as RectangleNode | EllipseNode);
-        } else {
-          typeInfo = `<p><strong>Unsupported Layer Type:</strong> ${layer.type}</p>`;
-        }
-
-        return `<div>
-                  <p><strong>Name:</strong> ${layer.name}</p>
-                  ${typeInfo}
-                  ${additionalInfo}
-                  <p><strong>ID:</strong> ${layer.id}</p>
-                </div>`;
-      })
-      .join('<hr>');
-
-    figma.ui.postMessage({ type: 'updateLayerInfo', layerInfoHTML });
+  if (cssInfoHTML !== '') {
+    figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML });
   } else {
-    figma.ui.postMessage({ type: 'updateLayerInfo', layerInfoHTML: 'No layers selected.' });
+    figma.ui.postMessage({ type: 'updateCSSInfo', cssInfoHTML: 'No text layers selected.' });
   }
 }
 
-function getTextLayerInfo(layer: TextNode): string {
-  const { fontSize, lineHeight, fontWeight, fontName } = layer;
-
-  return `<p><strong>Font Size:</strong> ${("fontSize")}px</p>
-          <p><strong>Line Height:</strong> ${("lineHeight")}px</p>
-          <p><strong>Font Weight:</strong> ${("fontWeight")}</p>
-          <p><strong>Font Family:</strong> ${(fontName as FontName | null)?.family ?? 'N/A'}</p>`;
-}
-
-function getShapeLayerInfo(layer: RectangleNode | EllipseNode): string {
-  const { width, height } = layer;
-
-  return `<p><strong>Width:</strong> ${width}px</p>
-          <p><strong>Height:</strong> ${height}px</p>`;
-}
+// Listen for messages from the plugin UI
+figma.ui.onmessage = (msg) => {
+  if (msg.type === 'applyChanges') {
+    // Handle any UI interactions if needed
+  }
+};
