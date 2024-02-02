@@ -1,4 +1,16 @@
 // code.ts
+import { isTextNode } from "@figma-plugin/helpers";
+import { getTextNodeCSS } from "@figma-plugin/helpers";
+const firstTextNode = figma.currentPage.findOne(node => isTextNode(node));
+console.log("First Text Node is " + firstTextNode);
+
+const selectedNodes = figma.currentPage.selection;
+selectedNodes.forEach(node => {
+  if (isTextNode(node)) {
+    const css = getTextNodeCSS(node);
+    console.log("Testicle CSS is " + css["font-family"]);
+  }
+});
 
 figma.showUI(__html__, { width: 300, height: 200 });
 

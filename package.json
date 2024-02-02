@@ -1,19 +1,26 @@
 {
-  "name": "Inspect-Pane",
+  "name": "inspect-pane",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
   "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "webpack",
     "watch": "npm run build -- --watch"
   },
   "author": "",
   "license": "",
   "devDependencies": {
     "@figma/plugin-typings": "^1.85.0",
-    "typescript": "*"
+    "@types/lodash": "^4.14.202",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@figma-plugin/helpers": "^0.15.2"
+    "@figma-plugin/helpers": "^0.15.2",
+    "i": "^0.3.7",
+    "lodash": "^4.17.21",
+    "npm": "^10.4.0"
   }
 }
