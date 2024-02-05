@@ -28,16 +28,24 @@ function updateSelectedLayers() {
 
     Object.entries(css).forEach(([property, value]) => {
       const currentNode = `<p><strong class="dark">${property}:</strong> ${value};</p>`;
-      if (
-        ["position", "top", "left", "width", "height"].includes(property)
-      ) {
+
+      if(value == "0px" || value == "none" || value == "0%" || value == "auto"){
+        fontProps.push('');
+      }
+            else if (value == "null null" || value === null || value == undefined) {
+        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span></p>`);
+      }
+      else if (["position", "top", "left", "width", "height"].includes(property)) {
         layoutProps.push(currentNode);
       }
-      if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
+      else if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
         flexProps.push(currentNode);
       }
-      else if (["text-indent", "letter-spacing", "line-height", "font-size", "font-family", "font-weight", "text-transform", "text-decoration", "font-style"].includes(property)) {
+      else if (["font-style", "font-size", "text-indent", "letter-spacing", "line-height", "font-weight", "text-transform", "text-decoration"].includes(property)) {
         fontProps.push(currentNode);
+      }
+      else if (property === "font-family") {
+        fontProps.push(`<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}";</span></p>`);
       }
     });
 
@@ -54,7 +62,7 @@ function updateSelectedLayers() {
     </div>`;
     totalHeight = 350; // Adjust this value based on your content's height
   } else if (selectedNodes.length > 1) {
-    cssInfoHTML = `<p class="inter"><strong>⚠️ Error:</strong> Cannot select multiple layers</p>`;
+    cssInfoHTML = `<p class="inter error"><strong>⚠️ Error:</strong> Cannot select multiple layers</p>`;
   } else {
     cssInfoHTML = `<p class="inter dark">No text layers selected</p>`;
   }
