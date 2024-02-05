@@ -12,6 +12,34 @@ figma.on("selectionchange", () => {
   updateSelectedLayers();
 });
 
+
+
+function getFontWeight(node: TextNode): number | string {
+  const fontWeightMapping: { [index: string]: number } = {
+    'Thin': 100,
+    'ExtraLight': 200,
+    'Light': 300,
+    'Regular': 400,
+    'Medium': 500,
+    'SemiBold': 600,
+    'Bold': 700,
+    'ExtraBold': 800,
+    'Black': 900
+  };
+  if ("fontName" in node) {
+    const fontName = node.fontName;
+    // More robust check for fontName being a FontName object
+    if (fontName && typeof fontName === 'object' && 'style' in fontName) {
+      const fontWeightStyle = fontName.style;
+      return fontWeightMapping[fontWeightStyle as keyof typeof fontWeightMapping] || fontWeightStyle;
+    } else {
+      return 'Mixed or undefined font styles';
+    }
+  }
+  return 'Unknown';
+}
+
+
 function updateSelectedLayers() {
   const selectedNodes = figma.currentPage.selection;
 
@@ -41,8 +69,11 @@ function updateSelectedLayers() {
       else if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
         flexProps.push(currentNode);
       }
-      else if (["font-style", "font-size", "text-indent", "letter-spacing", "line-height", "font-weight", "text-transform", "text-decoration"].includes(property)) {
+      else if (["font-style", "font-size", "text-indent", "letter-spacing", "line-height", "text-transform", "text-decoration"].includes(property)) {
         fontProps.push(currentNode);
+      } else if (property === "font-weight") {
+        const fontWeightValue = getFontWeight(node);
+        fontProps.push(`<p><strong class="dark">${property}:</strong> ${fontWeightValue}<span class="dark">;</span></p>`);
       }
       else if (property === "font-family") {
         fontProps.push(`<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}"<span class="dark">;</span></span></p>`);
