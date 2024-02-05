@@ -27,13 +27,13 @@ function updateSelectedLayers() {
     console.log(JSON.stringify(css));
 
     Object.entries(css).forEach(([property, value]) => {
-      const currentNode = `<p><strong class="dark">${property}:</strong> ${value};</p>`;
+      const currentNode = `<p><strong class="dark">${property}:</strong> ${value}<span class="dark">;</span></p>`;
 
-      if(value == "0px" || value == "none" || value == "0%" || value == "auto"){
+      if (value == "0px" || value == "none" || value == "0%" || value == "auto"){
         fontProps.push('');
       }
-            else if (value == "null null" || value === null || value == undefined) {
-        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span></p>`);
+      else if (value == "null null" || value === null || value == undefined) {
+        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span><span class="dark">;</span></p>`);
       }
       else if (["position", "top", "left", "width", "height"].includes(property)) {
         layoutProps.push(currentNode);
@@ -45,7 +45,7 @@ function updateSelectedLayers() {
         fontProps.push(currentNode);
       }
       else if (property === "font-family") {
-        fontProps.push(`<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}";</span></p>`);
+        fontProps.push(`<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}"<span class="dark">;</span></span></p>`);
       }
     });
 
