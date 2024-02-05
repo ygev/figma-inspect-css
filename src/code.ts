@@ -12,8 +12,6 @@ figma.on("selectionchange", () => {
   updateSelectedLayers();
 });
 
-
-
 function getFontWeight(node: TextNode): number | string {
   const fontWeightMapping: { [index: string]: number } = {
     'Thin': 100,
@@ -25,13 +23,26 @@ function getFontWeight(node: TextNode): number | string {
     'Bold': 700,
     'ExtraBold': 800,
     'Black': 900
+    // Add more mappings if necessary
   };
+
   if ("fontName" in node) {
     const fontName = node.fontName;
-    // More robust check for fontName being a FontName object
     if (fontName && typeof fontName === 'object' && 'style' in fontName) {
       const fontWeightStyle = fontName.style;
-      return fontWeightMapping[fontWeightStyle as keyof typeof fontWeightMapping] || fontWeightStyle;
+
+      // Split the style into parts (e.g., 'Bold Italic' -> ['Bold', 'Italic'])
+      const styleParts = fontWeightStyle.split(' ');
+
+      // Check each part to see if it's a recognized weight, and return the first match
+      for (const part of styleParts) {
+        if (part in fontWeightMapping) {
+          return fontWeightMapping[part as keyof typeof fontWeightMapping];
+        }
+      }
+
+      // If no recognized weight is found, return the entire style or a default message
+      return fontWeightStyle || 'Unknown style';
     } else {
       return 'Mixed or undefined font styles';
     }
@@ -61,7 +72,7 @@ function updateSelectedLayers() {
         fontProps.push('');
       }
       else if (value == "null null" || value === null || value == undefined) {
-        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span><span class="dark">;</span></p>`);
+        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed</span><span class="dark"></span></p>`);
       }
       else if (["position", "top", "left", "width", "height"].includes(property)) {
         layoutProps.push(currentNode);
@@ -69,7 +80,7 @@ function updateSelectedLayers() {
       else if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
         flexProps.push(currentNode);
       }
-      else if (["font-style", "font-size", "text-indent", "letter-spacing", "line-height", "text-transform", "text-decoration"].includes(property)) {
+      else if (["font-size", "text-indent", "letter-spacing", "line-height", "text-transform", "text-decoration"].includes(property)) {
         fontProps.push(currentNode);
       } else if (property === "font-weight") {
         const fontWeightValue = getFontWeight(node);
