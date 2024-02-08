@@ -50,6 +50,32 @@ function getFontWeight(node: TextNode): number | string {
   return 'Unknown';
 }
 
+function getColor(node: TextNode): string {
+  // Check if node.fills is an array and not a symbol
+  if ('fills' in node && Array.isArray(node.fills)) {
+    const fills = node.fills as readonly Paint[];
+    if (fills.length === 1) {
+      const fill = fills[0];
+      if (fill.type === 'SOLID') {
+        // Solid color (opacity is ignored in the hex representation)
+        return rgbToHex(fill.color);
+      } else {
+        // Ignore gradients and other fill types
+        return 'none'; // You can also return a message indicating unsupported fill type
+      }
+    } else if (fills.length > 1) {
+      // Mixed fill
+      return 'mixed';
+    }
+  }
+  return 'none'; // No fills or unable to parse
+}
+
+function rgbToHex(color: RGB): string {
+  const toHex = (v: number) => Math.round(v * 255).toString(16).padStart(2, '0');
+  return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
+}
+
 
 function updateSelectedLayers() {
   const selectedNodes = figma.currentPage.selection;
@@ -72,7 +98,7 @@ function updateSelectedLayers() {
         fontProps.push('');
       }
       else if (value == "null null" || value === null || value == undefined) {
-        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed</span><span class="dark"></span></p>`);
+        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span><span class="dark"></span></p>`);
       }
       else if (["position", "top", "left", "width", "height"].includes(property)) {
         layoutProps.push(currentNode);
@@ -91,6 +117,18 @@ function updateSelectedLayers() {
       }
     });
 
+    // Handle color/gradient
+    const colorStyle = getColor(node);
+
+    // Now we'll add conditional logic based on the colorStyle value
+    if (colorStyle === 'mixed') {
+      // Apply the error class around "mixed" and strikethrough to the parent <p>
+      fontProps.push(`<p class="strikethrough"><strong class="dark">color:</strong> <span class="error">mixed</span><span class="dark">;</span></p>`);
+    } else if (colorStyle !== 'none') {
+      // If colorStyle is not 'none', append it normally (handling valid colors)
+      fontProps.push(`<p><strong class="dark">color:</strong> ${colorStyle}<span class="dark">;</span></p>`);
+      // No action is needed for 'none', effectively hiding it
+    }
     cssInfoHTML = `<div>
       <section>
         ${layoutProps.join("\n")}
