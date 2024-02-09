@@ -75,7 +75,10 @@ function rgbToHex(color: RGB): string {
   const toHex = (v: number) => Math.round(v * 255).toString(16).padStart(2, '0');
   return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
 }
-
+function isNumberBased(value: string): boolean {
+  // A simple regex to check if the value contains a number
+  return /\d/.test(value);
+}
 
 function updateSelectedLayers() {
   const selectedNodes = figma.currentPage.selection;
@@ -89,62 +92,53 @@ function updateSelectedLayers() {
   if (selectedNodes.length === 1 && isTextNode(selectedNodes[0])) {
     const node = selectedNodes[0];
     const css = getTextNodeCSS(node);
-    console.log(JSON.stringify(css));
 
     Object.entries(css).forEach(([property, value]) => {
-      const currentNode = `<p><strong class="dark">${property}:</strong> ${value}<span class="dark">;</span></p>`;
+      // Early handling for specific cases to avoid unnecessary processing
+      if (value === "0px" || value === "none" || value === "0%" || value === "auto") {
+        // Skip adding to fontProps for these values
+        return; // effectively skips this iteration
+      } else if (value === "null null" || value === null || value === undefined) {
+        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed</span><span class="dark">;</span></p>`);
+        return; // skips further processing for this property
+      }
 
-      if (value == "0px" || value == "none" || value == "0%" || value == "auto"){
-        fontProps.push('');
+      let currentNode;
+
+      if (property === "font-family") {
+        currentNode = `<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}"<span class="dark">;</span></span></p>`;
+      } else {
+        const valueClass = isNumberBased(value) ? "orange" : "green";
+        const currentValue = property === "font-weight" ? getFontWeight(node).toString() : value; // Special handling for font-weight
+        const formattedValue = `<span class="${valueClass}">${currentValue}</span>`;
+        currentNode = `<p><strong class="dark">${property}:</strong> ${formattedValue}<span class="dark">;</span></p>`;
       }
-      else if (value == "null null" || value === null || value == undefined) {
-        fontProps.push(`<p class="strikethrough dark italics"><strong>${property}:</strong> <span class="error"> mixed </span><span class="dark"></span></p>`);
-      }
-      else if (["position", "top", "left", "width", "height"].includes(property)) {
+
+      if (["position", "top", "left", "width", "height"].includes(property)) {
         layoutProps.push(currentNode);
-      }
-      else if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
+      } else if (["display", "flex-start", "justify-content", "align-items"].includes(property)) {
         flexProps.push(currentNode);
-      }
-      else if (["font-size", "text-indent", "letter-spacing", "line-height", "text-transform", "text-decoration"].includes(property)) {
+      } else if (["text-indent", "letter-spacing", "line-height", "font-size",  "font-weight", "text-transform", "text-decoration",  "font-family"].includes(property))  {
         fontProps.push(currentNode);
-      } else if (property === "font-weight") {
-        const fontWeightValue = getFontWeight(node);
-        fontProps.push(`<p><strong class="dark">${property}:</strong> ${fontWeightValue}<span class="dark">;</span></p>`);
-      }
-      else if (property === "font-family") {
-        fontProps.push(`<p><strong class="dark">${property}:</strong> <span class="font-family">"${value}"<span class="dark">;</span></span></p>`);
       }
     });
 
-    // Handle color/gradient
     const colorStyle = getColor(node);
-
-    // Now we'll add conditional logic based on the colorStyle value
-    if (colorStyle === 'mixed') {
-      // Apply the error class around "mixed" and strikethrough to the parent <p>
+    if (colorStyle !== "none" && colorStyle !== "mixed") {
+      const colorClass = isNumberBased(colorStyle) ? "orange" : "green";
+      fontProps.push(`<p><strong class="dark">color:</strong> <span class="${colorClass}">${colorStyle}</span><span class="dark">;</span></p>`);
+    } else if (colorStyle === "mixed") {
       fontProps.push(`<p class="strikethrough"><strong class="dark">color:</strong> <span class="error">mixed</span><span class="dark">;</span></p>`);
-    } else if (colorStyle !== 'none') {
-      // If colorStyle is not 'none', append it normally (handling valid colors)
-      fontProps.push(`<p><strong class="dark">color:</strong> ${colorStyle}<span class="dark">;</span></p>`);
-      // No action is needed for 'none', effectively hiding it
     }
+
     cssInfoHTML = `<div>
-      <section>
-        ${layoutProps.join("\n")}
-      </section>
-      <section>
-        ${flexProps.join("\n")}
-      </section>
-      <section>
-        ${fontProps.join("\n")}
-      </section>
+      <section>${layoutProps.join("\n")}</section>
+      <section>${flexProps.join("\n")}</section>
+      <section>${fontProps.join("\n")}</section>
     </div>`;
-    totalHeight = 350; // Adjust this value based on your content's height
-  } else if (selectedNodes.length > 1) {
-    cssInfoHTML = `<p class="inter error"><strong>⚠️ Error:</strong> Cannot select multiple layers</p>`;
+    totalHeight = 350;
   } else {
-    cssInfoHTML = `<p class="inter dark">No text layers selected</p>`;
+    cssInfoHTML = selectedNodes.length > 1 ? `<p class="inter error"><strong>⚠️ Error:</strong> Cannot select multiple layers</p>` : `<p class="inter dark">No text layer selected</p>`;
   }
 
   figma.ui.postMessage({ type: "updateCSSInfo", cssInfoHTML, totalHeight });
