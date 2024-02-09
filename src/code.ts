@@ -126,7 +126,9 @@ function updateSelectedLayers() {
     const colorStyle = getColor(node);
     if (colorStyle !== "none" && colorStyle !== "mixed") {
       const colorClass = isNumberBased(colorStyle) ? "orange" : "green";
-      fontProps.push(`<p><strong class="dark">color:</strong> <span class="${colorClass}">${colorStyle}</span><span class="dark">;</span></p>`);
+      // Adding a small square with the background color set to the colorStyle
+      const colorPreview = `<svg width="12" height="12" style="vertical-align: middle; margin-left: 6px;"><rect x="1" y="1" width="10" height="10" fill="${colorStyle}" stroke="#BEBEBE" stroke-width="1" rx="1" ry="1"></rect></svg>`;
+      fontProps.push(`<p><strong class="dark">color:</strong> <span class="${colorClass}">${colorStyle}</span><span class="dark">;</span>${colorPreview}  </p>`);
     } else if (colorStyle === "mixed") {
       fontProps.push(`<p class="strikethrough"><strong class="dark">color:</strong> <span class="error">mixed</span><span class="dark">;</span></p>`);
     }
